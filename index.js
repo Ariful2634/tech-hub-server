@@ -28,6 +28,7 @@ async function run() {
     await client.connect();
 
     const featureProductCollection = client.db("hubDB").collection("feature")
+    const reviewCollection = client.db("hubDB").collection("reviews")
 
     // feature product get
 
@@ -45,6 +46,14 @@ async function run() {
         // }
         const cursor = featureProductCollection.find()
         const result = await cursor.toArray()
+        res.send(result)
+    })
+
+    // post review
+
+    app.post('/reviews', async(req,res)=>{
+        const review = req.body;
+        const result = await reviewCollection.insertOne(review)
         res.send(result)
     })
 
