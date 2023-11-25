@@ -83,6 +83,16 @@ async function run() {
         res.send(result)
     })
 
+    app.get('/addProduct', async(req,res)=>{
+        let query = {}
+        if(req.query?.email){
+            query = {email: req.query.email}
+        }
+        const cursor = addProductCollection.find(query)
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+
 
 
 
