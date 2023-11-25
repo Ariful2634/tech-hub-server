@@ -30,6 +30,7 @@ async function run() {
     const featureProductCollection = client.db("hubDB").collection("feature")
     const reviewCollection = client.db("hubDB").collection("reviews")
     const trendingProductCollection = client.db("hubDB").collection("trending")
+    const addProductCollection = client.db("hubDB").collection("addProduct")
 
     // feature product get
 
@@ -72,6 +73,20 @@ async function run() {
         const result = await cursor.toArray()
         res.send(result)
     })
+
+
+    // user related api
+
+    app.post('/addProduct', async(req,res)=>{
+        const newProduct = req.body;
+        const result = await addProductCollection.insertOne(newProduct)
+        res.send(result)
+    })
+
+
+
+
+
 
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
