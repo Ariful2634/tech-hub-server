@@ -10,7 +10,7 @@ app.use(cors())
 app.use(express.json())
 
 
-const { MongoClient, ServerApiVersion } = require('mongodb');
+const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const uri = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@cluster0.stv3jdc.mongodb.net/?retryWrites=true&w=majority`;
 
 // Create a MongoClient with a MongoClientOptions object to set the Stable API version
@@ -35,18 +35,18 @@ async function run() {
     // feature product get
 
     app.get('/featureProduct', async(req,res)=>{
-        // const filter = req.query;
-        // console.log(filter)
-        // const query = {
-        //     // price: {$lt:100}
-        //     // title: {$regex: filter.search, $options:'i'}
-        // }
-        // const options = {
-        //     sort:{
-        //         timestamp: filter.sort === 'asc' ? 1 : -1,
-        //     }
-        // }
-        const cursor = featureProductCollection.find()
+        const filter = req.query;
+        console.log(filter)
+        const query = {
+            // price: {$lt:100}
+            // title: {$regex: filter.search, $options:'i'}
+        }
+        const options = {
+            sort:{
+                timestamp: filter.sort === 'asc' ? 1 : -1,
+            }
+        }
+        const cursor = featureProductCollection.find(query,options)
         const result = await cursor.toArray()
         res.send(result)
     })
@@ -92,6 +92,39 @@ async function run() {
         const result = await cursor.toArray()
         res.send(result)
     })
+
+    app.get('/addProduct/:id',async(req,res)=>{
+        const id=req.params.id;
+        const query = {_id: new ObjectId(id)}
+        const result = await addProductCollection.findOne(query);
+        res.send(result)
+    })
+
+    app.put('/update/:id', async(req,res)=>{
+        const id=req.params.id;
+        const filter = {_id: new ObjectId(id)}
+        const options = { upsert: true };
+        const updateTech = req.body;
+        const tech = {
+            $set:{
+                product_name : updateTech.product_name,
+                product_image: updateTech.product_image,
+                description : updateTech.description,
+                tags: updateTech.tags,
+                links: updateTech.links,
+
+            }
+        }
+        const result = await addProductCollection.updateOne(filter,tech,options)
+        res.send(result)
+    })
+
+    // app.delete('/addProduct/:id', async(req,res)=>{
+    //     const id = req.params.id;
+    //     const query = {_id: new ObjectId(id)}
+    //     const result = await addProductCollection.deleteOne(query)
+    //     res.send(result)
+    // })
 
 
 
