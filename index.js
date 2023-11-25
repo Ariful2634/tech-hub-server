@@ -29,6 +29,7 @@ async function run() {
 
     const featureProductCollection = client.db("hubDB").collection("feature")
     const reviewCollection = client.db("hubDB").collection("reviews")
+    const trendingProductCollection = client.db("hubDB").collection("trending")
 
     // feature product get
 
@@ -61,6 +62,13 @@ async function run() {
 
     app.get('/reviews', async(req,res)=>{
         const cursor = reviewCollection.find()
+        const result = await cursor.toArray()
+        res.send(result)
+    })
+    // get trending product
+
+    app.get('/trendingProduct', async(req,res)=>{
+        const cursor = trendingProductCollection.find()
         const result = await cursor.toArray()
         res.send(result)
     })
