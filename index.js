@@ -32,6 +32,16 @@ async function run() {
     const trendingProductCollection = client.db("hubDB").collection("trending")
     const addProductCollection = client.db("hubDB").collection("addProduct")
 
+
+    // post feature product
+
+    app.post('/featureProduct', async(req,res)=>{
+        const featuredProduct = req.body;
+        const result = await featureProductCollection.insertOne(featuredProduct)
+        res.send(result)
+    })
+
+
     // feature product get
 
     app.get('/featureProduct', async(req,res)=>{
@@ -110,7 +120,6 @@ async function run() {
                 product_name : updateTech.product_name,
                 product_image: updateTech.product_image,
                 description : updateTech.description,
-                tags: updateTech.tags,
                 links: updateTech.links,
 
             }
