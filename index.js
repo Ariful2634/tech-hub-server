@@ -87,6 +87,25 @@ async function run() {
           })
 
 
+        //   upvote
+        app.put('/addProduct/upvote/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updateStatus = req.body;
+            const upvote = {
+                $set: {
+
+                    upvoted: updateStatus.upvote,
+
+
+                }
+            }
+            const result = await addProductCollection.updateOne(filter, upvote, options)
+            res.send(result)
+        })
+
+
         // status related
 
         app.put('/addProduct/status/:id', async (req, res) => {
