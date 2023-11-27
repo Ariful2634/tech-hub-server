@@ -31,7 +31,33 @@ async function run() {
     const reviewCollection = client.db("hubDB").collection("reviews")
     const trendingProductCollection = client.db("hubDB").collection("trending")
     const addProductCollection = client.db("hubDB").collection("addProduct")
+    // const statusCollection = client.db("hubDB").collection("status")
 
+
+
+    // status related
+
+    app.put('/addProduct/status/:id', async(req,res)=>{
+        const id=req.params.id;
+        const filter = {_id: new ObjectId(id)}
+        const options = { upsert: true };
+        const updateStatus = req.body;
+        const status = {
+            $set:{
+               
+                status: updateStatus.status,
+
+            }
+        }
+        const result = await addProductCollection.updateOne(filter,status,options)
+        res.send(result)
+    })
+
+    // app.get('/status', async(req,res)=>{
+    //     const cursor = statusCollection.find()
+    //     const result = await cursor.toArray()
+    //     res.send(result)
+    // })
 
     // post feature product
 
