@@ -31,7 +31,7 @@ async function run() {
     const reviewCollection = client.db("hubDB").collection("reviews")
     const trendingProductCollection = client.db("hubDB").collection("trending")
     const addProductCollection = client.db("hubDB").collection("addProduct")
-    // const statusCollection = client.db("hubDB").collection("status")
+    const reportCollection = client.db("hubDB").collection("report")
 
 
 
@@ -67,6 +67,15 @@ async function run() {
             }
         }
         const result = await addProductCollection.updateOne(filter,mark,options)
+        res.send(result)
+    })
+
+
+    // post report
+
+    app.post('/report', async(req,res)=>{
+        const reportedProduct = req.body;
+        const result = await reportCollection.insertOne(reportedProduct)
         res.send(result)
     })
 
