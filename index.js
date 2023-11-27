@@ -32,7 +32,59 @@ async function run() {
         const trendingProductCollection = client.db("hubDB").collection("trending")
         const addProductCollection = client.db("hubDB").collection("addProduct")
         const reportCollection = client.db("hubDB").collection("report")
+        const usersCollection = client.db("hubDB").collection("users")
 
+
+        // register user
+
+        app.post('/users', async (req, res) => {
+            const user = req.body;
+
+            // insert email if user dosen't exists
+
+            const query = { email: user.email }
+            const existingUser = await usersCollection.findOne(query)
+            if (existingUser) {
+                return res.send({ message: 'user already exists', insertedId: null })
+            }
+
+            const result = await usersCollection.insertOne(user)
+            res.send(result)
+        })
+
+
+        app.get('/users',  async (req, res) => {
+
+            const result = await usersCollection.find().toArray()
+            res.send(result)
+        })
+
+        app.patch('/users/admin/:id',  async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: new ObjectId(id)}
+            const updateDoc={
+              $set:{
+                role:'admin'
+              }
+            }
+            const result = await usersCollection.updateOne(filter,updateDoc)
+            res.send(result)
+          })
+
+          app.get('/users/admin/:email',  async(req,res)=>{
+            const email = req.params.email;
+            // if(email !== req.decoded.email){
+            //   return res.status(403).send({message:'forbidden access'})
+            // }
+      
+            const query = {email:email}
+            const user = await usersCollection.findOne(query)
+            let admin = false;
+            if(user){
+              admin = user?.role==='admin'
+            }
+            res.send({admin})
+          })
 
 
         // status related
