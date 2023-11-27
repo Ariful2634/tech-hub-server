@@ -46,18 +46,31 @@ async function run() {
             $set:{
                
                 status: updateStatus.status,
+            
 
             }
         }
         const result = await addProductCollection.updateOne(filter,status,options)
         res.send(result)
     })
+    app.put('/addProduct/mark/:id', async(req,res)=>{
+        const id=req.params.id;
+        const filter = {_id: new ObjectId(id)}
+        const options = { upsert: true };
+        const updateStatus = req.body;
+        const mark = {
+            $set:{
+               
+                mark:updateStatus.mark,
+            
 
-    // app.get('/status', async(req,res)=>{
-    //     const cursor = statusCollection.find()
-    //     const result = await cursor.toArray()
-    //     res.send(result)
-    // })
+            }
+        }
+        const result = await addProductCollection.updateOne(filter,mark,options)
+        res.send(result)
+    })
+
+    
 
     // post feature product
 
