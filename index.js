@@ -86,6 +86,40 @@ async function run() {
             res.send({admin})
           })
 
+            app.patch('/users/moderator/:id',  async(req,res)=>{
+            const id = req.params.id;
+            const filter = {_id: new ObjectId(id)}
+            const updateDoc={
+              $set:{
+                role:'moderator'
+              }
+            }
+            const result = await usersCollection.updateOne(filter,updateDoc)
+            res.send(result)
+          })
+
+          app.get('/users/moderator/:email',  async(req,res)=>{
+            const email = req.params.email;
+            // if(email !== req.decoded.email){
+            //   return res.status(403).send({message:'forbidden access'})
+            // }
+      
+            const query = {email:email}
+            const user = await usersCollection.findOne(query)
+            let moderator = false;
+            if(user){
+              moderator = user?.role==='moderator'
+            }
+            res.send({moderator})
+          })
+
+          app.delete('/users/:id',  async(req,res)=>{
+            const id = req.params.id;
+            const query = {_id: new ObjectId(id)}
+            const result = await usersCollection.deleteOne(query)
+            res.send(result)
+          })
+
 
         //   upvote
         app.put('/addProduct/upvote/:id', async (req, res) => {
