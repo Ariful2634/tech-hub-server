@@ -122,6 +122,7 @@ async function run() {
 
 
         //   upvote
+
         app.put('/addProduct/upvote/:id', async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
@@ -137,6 +138,24 @@ async function run() {
                 }
             }
             const result = await addProductCollection.updateOne(filter, upvote, options)
+            res.send(result)
+        })
+
+        app.put('/trendingProduct/upvote/:id', async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: new ObjectId(id) }
+            const options = { upsert: true };
+            const updateStatus = req.body;
+            const upvote = {
+                $set: {
+
+                    upvoted: updateStatus.upvote,
+                    voteEmail:updateStatus.voteEmail
+
+
+                }
+            }
+            const result = await trendingProductCollection.updateOne(filter, upvote, options)
             res.send(result)
         })
 
