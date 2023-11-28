@@ -36,6 +36,7 @@ async function run() {
         const reportCollection = client.db("hubDB").collection("report")
         const usersCollection = client.db("hubDB").collection("users")
         const paymentCollection = client.db("hubDB").collection("payments")
+        const couponCollection = client.db("hubDB").collection("coupons")
 
 
         // jwt related api
@@ -406,6 +407,21 @@ async function run() {
     })
 
 
+    // coupon related
+
+    
+    app.post('/coupon', async (req, res) => {
+        const coupons = req.body;
+        const result = await couponCollection.insertOne(coupons)
+        res.send(result)
+    })
+
+
+    app.get('/coupon', async (req, res) => {
+            
+        const result = await couponCollection.find().toArray()
+        res.send(result)
+    })
       
 
 
