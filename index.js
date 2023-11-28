@@ -131,6 +131,7 @@ async function run() {
                 $set: {
 
                     upvoted: updateStatus.upvote,
+                    voteEmail:updateStatus.voteEmail
 
 
                 }
