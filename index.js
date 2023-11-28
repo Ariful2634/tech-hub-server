@@ -141,9 +141,9 @@ async function run() {
 
           app.get('/users/moderator/:email', verifyToken,  async(req,res)=>{
             const email = req.params.email;
-            // if(email !== req.decoded.email){
-            //   return res.status(403).send({message:'forbidden access'})
-            // }
+            if(email !== req.decoded.email){
+              return res.status(403).send({message:'forbidden access'})
+            }
       
             const query = {email:email}
             const user = await usersCollection.findOne(query)
@@ -322,9 +322,12 @@ async function run() {
             const page = parseInt(req.query.page) || 1;
             const pageSize = parseInt(req.query.pageSize) || 20;
             const skip = (page - 1) * pageSize;
-            const cursor = addProductCollection.find({ ...filterQuery, ...searchQuery })
-                .skip(skip)
-                .limit(pageSize);
+            const cursor = addProductCollection
+        .find({ ...filterQuery, ...searchQuery })
+        
+        .skip(skip)
+        .limit(pageSize)
+        .sort({ timestamp: -1 });
             const result = await cursor.toArray();
             res.send(result);
         })
