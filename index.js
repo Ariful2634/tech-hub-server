@@ -1,6 +1,7 @@
 const express = require('express');
 const cors = require('cors');
 const app = express();
+const jwt = require('jsonwebtoken')
 require('dotenv').config()
 const port = process.env.PORT || 5000;
 
@@ -35,6 +36,44 @@ async function run() {
         const usersCollection = client.db("hubDB").collection("users")
 
 
+        // jwt related api
+
+        app.post('/jwt', async(req,res)=>{
+            const user = req.body;
+            const token=jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {expiresIn: '1h'})
+            res.send({token})
+          })
+
+        //   verify token middleware
+
+        const verifyToken = (req,res,next)=>{
+            console.log('inside verify token',req.headers.authorization)
+            if(!req.headers.authorization){
+              return res.status(401).send({message:'forbidden access'})
+            }
+            const token = req.headers.authorization.split(' ')[1]
+            jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded)=>{
+              if(err){
+                return res.status(401).send({message:'forbidden access'})
+              }
+              req.decoded=decoded;
+              next()
+            })
+          }
+
+        //   verify admin
+        const verifyAdmin = async (req,res,next)=>{
+            const email = req.decoded.email;
+            const query = {email: email}
+            const user = await usersCollection.findOne(query)
+            const isAdmin = user?.role==='admin';
+            if(!isAdmin){
+              return res.status(403).send({message:'forbidden access'})
+            }
+            next()
+           }
+
+
         // register user
 
         app.post('/users', async (req, res) => {
@@ -53,13 +92,13 @@ async function run() {
         })
 
 
-        app.get('/users',  async (req, res) => {
-
+        app.get('/users', verifyToken, verifyAdmin, async (req, res) => {
+            
             const result = await usersCollection.find().toArray()
             res.send(result)
         })
 
-        app.patch('/users/admin/:id',  async(req,res)=>{
+        app.patch('/users/admin/:id', verifyToken,verifyAdmin,  async(req,res)=>{
             const id = req.params.id;
             const filter = {_id: new ObjectId(id)}
             const updateDoc={
@@ -71,11 +110,11 @@ async function run() {
             res.send(result)
           })
 
-          app.get('/users/admin/:email',  async(req,res)=>{
+          app.get('/users/admin/:email', verifyToken, async(req,res)=>{
             const email = req.params.email;
-            // if(email !== req.decoded.email){
-            //   return res.status(403).send({message:'forbidden access'})
-            // }
+            if(email !== req.decoded.email){
+              return res.status(403).send({message:'forbidden access'})
+            }
       
             const query = {email:email}
             const user = await usersCollection.findOne(query)
@@ -86,7 +125,7 @@ async function run() {
             res.send({admin})
           })
 
-            app.patch('/users/moderator/:id',  async(req,res)=>{
+            app.patch('/users/moderator/:id', verifyToken,  async(req,res)=>{
             const id = req.params.id;
             const filter = {_id: new ObjectId(id)}
             const updateDoc={
@@ -98,7 +137,7 @@ async function run() {
             res.send(result)
           })
 
-          app.get('/users/moderator/:email',  async(req,res)=>{
+          app.get('/users/moderator/:email', verifyToken,  async(req,res)=>{
             const email = req.params.email;
             // if(email !== req.decoded.email){
             //   return res.status(403).send({message:'forbidden access'})
@@ -113,7 +152,7 @@ async function run() {
             res.send({moderator})
           })
 
-          app.delete('/users/:id',  async(req,res)=>{
+          app.delete('/users/:id', verifyToken,verifyAdmin,  async(req,res)=>{
             const id = req.params.id;
             const query = {_id: new ObjectId(id)}
             const result = await usersCollection.deleteOne(query)
@@ -162,7 +201,7 @@ async function run() {
 
         // status related
 
-        app.put('/addProduct/status/:id', async (req, res) => {
+        app.put('/addProduct/status/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true };
@@ -178,7 +217,7 @@ async function run() {
             const result = await addProductCollection.updateOne(filter, status, options)
             res.send(result)
         })
-        app.put('/addProduct/mark/:id', async (req, res) => {
+        app.put('/addProduct/mark/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true };
@@ -288,14 +327,14 @@ async function run() {
             res.send(result);
         })
 
-        app.get('/addProduct/:id', async (req, res) => {
+        app.get('/addProduct/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await addProductCollection.findOne(query);
             res.send(result)
         })
 
-        app.put('/update/:id', async (req, res) => {
+        app.put('/update/:id',verifyToken, async (req, res) => {
             const id = req.params.id;
             const filter = { _id: new ObjectId(id) }
             const options = { upsert: true };
@@ -313,7 +352,7 @@ async function run() {
             res.send(result)
         })
 
-        app.delete('/addProduct/:id', async (req, res) => {
+        app.delete('/addProduct/:id', verifyToken, async (req, res) => {
             const id = req.params.id;
             const query = { _id: new ObjectId(id) }
             const result = await addProductCollection.deleteOne(query)
