@@ -3,6 +3,7 @@ const cors = require('cors');
 const app = express();
 const jwt = require('jsonwebtoken')
 require('dotenv').config()
+const stripe = require('stripe')(process.env.STRIPE_SECRET_KEY)
 const port = process.env.PORT || 5000;
 
 // middleware
@@ -34,6 +35,7 @@ async function run() {
         const addProductCollection = client.db("hubDB").collection("addProduct")
         const reportCollection = client.db("hubDB").collection("report")
         const usersCollection = client.db("hubDB").collection("users")
+        const paymentCollection = client.db("hubDB").collection("payments")
 
 
         // jwt related api
@@ -358,6 +360,47 @@ async function run() {
             const result = await addProductCollection.deleteOne(query)
             res.send(result)
         })
+
+        // payment related
+
+        app.post('/create-payment-intent', async(req,res)=>{
+            const {price}=req.body;
+            if (isNaN(price) || price <= 0) {
+              return res.status(400).json({ error: 'Invalid or missing price value.' });
+            }
+            const amount = parseInt(price*100)
+            console.log(amount)
+      
+            const paymentIntent = await stripe.paymentIntents.create({
+              amount: amount,
+              currency: 'usd',
+              payment_method_types: ['card']
+            });
+      
+            res.send({
+              clientSecret: paymentIntent.client_secret
+            })
+      
+          })
+
+          // save payment 
+
+    app.post('/payments', async(req,res)=>{
+        const payment = req.body;
+        const paymentResult = await paymentCollection.insertOne(payment)
+        res.send({paymentResult })
+  
+      })
+
+      app.get('/payments', async (req, res) => {
+            
+        const result = await paymentCollection.find().toArray()
+        res.send(result)
+    })
+
+
+      
+
 
 
 
