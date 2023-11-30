@@ -333,8 +333,13 @@ async function run() {
             res.send(result);
         })
 
-        
-       
+        // get user mail
+        app.get('/addProduct/:email', async (req, res) => {
+            const email = req.params.email;
+            const query = { email: email };
+            const result = await addProductCollection.find(query).toArray();
+            res.send(result);
+        });
         
 
         app.get('/addProduct/:id', verifyToken, async (req, res) => {
@@ -406,6 +411,40 @@ async function run() {
         const result = await paymentCollection.find().toArray()
         res.send(result)
     })
+
+
+    // statistics related
+
+
+    app.get('/addProduct/count', async (req, res) => {
+        try {
+          const productCount = await addProductCollection.countDocuments();
+          res.json({ productCount });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      });
+    
+      app.get('/reviews/count', async (req, res) => {
+        try {
+          const reviewCount = await reviewCollection.countDocuments();
+          res.json({ reviewCount });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      });
+    
+      app.get('/users/count', async (req, res) => {
+        try {
+          const userCount = await usersCollection.countDocuments();
+          res.json({ userCount });
+        } catch (error) {
+          console.error(error);
+          res.status(500).json({ error: 'Internal Server Error' });
+        }
+      });
 
 
     // coupon related
