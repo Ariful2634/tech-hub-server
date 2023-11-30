@@ -334,7 +334,7 @@ async function run() {
         })
 
         
-        
+       
         
 
         app.get('/addProduct/:id', verifyToken, async (req, res) => {
@@ -377,7 +377,8 @@ async function run() {
               return res.status(400).json({ error: 'Invalid or missing price value.' });
             }
             const amount = parseInt(price*100)
-            console.log(amount)
+            // console.log(amount)
+            console.log(price)
       
             const paymentIntent = await stripe.paymentIntents.create({
               amount: amount,
